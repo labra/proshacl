@@ -17,7 +17,7 @@ test(addSet_existing2) :-
   findall(X,addSet(4,[2,4],X),Xs),
   assertion(Xs == [[2,4]])  .
 
-:- end_tests(set) .	
+:- end_tests(set) .     
 
 :- begin_tests(typings) .
 
@@ -37,14 +37,14 @@ test(addType_several_same) :-
   findall(X,addType(x,shape,[type(y,[shape1])],X),Xs), 
   assertion(Xs == [[type(y,[shape1]),
                    type(x,[shape])
-				  ]]) .
+            ]]) .
 
 test(addType_several_same) :- 
   findall(X,addType(x,shape,[type(y,[shape1]),type(z,[shape2])],X),Xs), 
   assertion(Xs == [[type(y,[shape1]),
                     type(z,[shape2]),
-					type(x,[shape])
-				  ]]) .
+                                        type(x,[shape])
+                                  ]]) .
 
 :- end_tests(typings) .
 
@@ -52,8 +52,28 @@ test(addType_several_same) :-
         
 test(matchEmpty) :-
    emptyContext(Ctx),
-   findall(Result, matchShape(Ctx,empty,[triple(x,p,y)],Result),Results) ,
+   findall(Result,
+           matchShape(Ctx,
+                      empty,
+                      [triple(x,p,y)],
+                      Result),
+           Results) ,
    assertion(Results == [result([],[],[triple(x,p,y)])]) .
+   
+   
+test(matchArc) :-
+   emptyContext(Ctx),
+   findall(Result,
+           matchShape(Ctx,
+                      arc(direct(p,valueSet(a)),1,unbounded),
+                      [triple(x,p,a)],
+                      Result),
+           Results),
+   assertion(Results == [result([],
+                                [(x,p,a)],
+                                [])
+                        ]
+   ).
 
 
    

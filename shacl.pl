@@ -25,7 +25,8 @@ matchShape(ctx(_,_,Typing),empty,Ts,result(Typing,[],Ts)).
 matchShape(context(_,_,Typing), 
   arc(_,0,unbounded), 
   Ts, 
-  result(Typing, [], Ts)).
+  result(Typing, [], Ts)) :-
+      write('unbounded1 0 - unbounded') .
 
 % unbounded2 
 
@@ -35,6 +36,7 @@ matchShape(Ctx,
    result(Typing, [T | Cs], Rs)
    ) :-
     M > 0, M1 is M - 1,
+    write('unbounded2 M - unbounded' ),
     removeSet(Ts,T,Ts1),
     matchArc(Ctx,Arc,T,Typing1),
     matchShape(Ctx,arc(Arc,M1,unbounded),Ts1,result(Cs,Rs,Typing2)),
@@ -46,7 +48,8 @@ matchShape(Ctx,
   arc(Arc,0,N),
   Ts, 
   result(Typing, [], Ts)) :-
-    N >= 0,
+    integer(N), N >= 0,
+    write('bounded1 - 0 - N'),
     noMatchArcAny(Ctx,Ts,Arc),
     typing(Ctx,Typing) .
 
@@ -55,11 +58,13 @@ matchShape(Ctx,
   arc(Arc,0,N),
   Ts, 
   result(Typing,[T|Cs],Rs)) :-
+    integer(N),  
     N >= 0, N1 is N - 1,
-        removeTriple(Ts,T,Ts1),
-        matchArc(Ctx,Arc,T,Typing1),
-        matchShape(Ctx,arc(Arc,0,N1),Ts1,result(Cs,Rs,Typing2)),
-        combineTypings(Typing1,Typing2,Typing) .
+    write('bounded2 0 - N'),
+    removeTriple(Ts,T,Ts1),
+    matchArc(Ctx,Arc,T,Typing1),
+    matchShape(Ctx,arc(Arc,0,N1),Ts1,result(Cs,Rs,Typing2)),
+    combineTypings(Typing1,Typing2,Typing) .
 
 % bounded3
 
@@ -67,11 +72,13 @@ matchShape(Ctx,
   arc(Arc,M,N),
   Ts, 
   result(Typing,[T|Cs],Rs)) :-
+	integer(M), integer(N),
     M > 0, N >= M, M1 is N - 1, N1 is N - 1,
-        removeTriple(Ts,T,Ts1),
-        matchArc(Ctx,Arc,T,Typing1),
-        matchShape(Ctx,arc(Arc,M1,N1),Ts1,result(Cs,Rs,Typing2)),
-        combineTypings(Typing1,Typing2,Typing) .
+    write('bounded3 - M - N'),
+    removeTriple(Ts,T,Ts1),
+    matchArc(Ctx,Arc,T,Typing1),
+    matchShape(Ctx,arc(Arc,M1,N1),Ts1,result(Cs,Rs,Typing2)),
+    combineTypings(Typing1,Typing2,Typing) .
 
 % and
 
@@ -94,20 +101,30 @@ matchShape(Ctx,or(_,E2),Ts,R) :-
    
 %%%
 
-matchBasicArc(arc(P,V),triple(_,P,O)):-matchValue(V,O) .
+matchArc(Ctx, 
+	direct(P,V),
+	triple(_,P,O),
+	Typing):-
+  matchValue(Ctx,V,O,Typing) .
 
-matchBasicArc(invArc(P,V),triple(S,P,_)):-matchValue(V,S) .
+matchArc(Ctx, 
+	inverse(P,V),
+	triple(S,P,_),
+	Typing):-
+  matchValue(Ctx,V,S,Typing) .
 
 %%%
 
 noMatchArcAny(Ctx,Triples,Arc) :- undefined .
 
 %%% 
-matchValue(_,valueSet(Set),O):-member(O,Set) .
+matchValue(Ctx,valueSet(Set),O,Typing):-
+   member(O,Set),
+   typing(Ctx,Typing) .
 
-matchValue(_,valueType(T),O):- undefined .
+matchValue(Ctx,valueType(T),O,Typing):- undefined .
 
-matchValue(context(_,_,Typing), valueRef(Label), O):-
+matchValue(context(_,_,Typing), valueRef(Label), O, Typing):-
   containsType(Typing,X,Label) .
   
 matchValue(Ctx, valueRef(Label), X, Typing) :-
