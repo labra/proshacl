@@ -140,15 +140,15 @@ addSet(X,[Y|L],[Y|LN]) :-
         X \= Y,
         addSet(X,L,LN).
         
-union(Xs,[],Xs).
+union([],Xs,Xs).
 union([X|Xs],Ys,Zs):-
   union(Xs,Ys,Rs) ,
   addSet(X,Rs,Zs) .
 
-% TODO: check that X is not in Xs
+% TODO: I could check that X is not in Xs
 removeSet([X|Xs],X,Xs) .
 
-member(X,[X]) .
+member(X,[X|_]) .
 member(X,[Y|Ys]):-
   X \= Y, 
   member(X,Ys).
